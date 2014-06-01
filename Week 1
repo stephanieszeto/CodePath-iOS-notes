@@ -14,6 +14,8 @@ key concepts:
 
 2 Graphics-heavy drawing-based: games, creative art, photo editing
 
+===============
+
 Client Architecture
 views
 controllers, models
@@ -81,3 +83,30 @@ Hardware
 3 accelerometer 
 4 Bluetooth, Airdrop
 5 Contacts, Calendar, SMS, Mail
+
+===============
+
+Creating a Custom Table View Cell
+- two mandatory table view methods: numberOfRowsInSection, cellForRowAtIndexPath
+- have the custom table view cell class be able to understand how to style its particular subviews (should understand the underlying model, allows for better encapsulation)
+
+- Steps:
+1 create custom table view cell class with .xib file  
+2 set custom class to be "CustomCell" in Inspector within .xib file 
+3 set up all the necessary subviews in the table view cell in .xib file
+4 create private outlets for the subviews that need to be customized in the .m file
+- tip: if using an UIImageView in the custom cell, do not name it imageView (will conflict with existing imageView property in TableViewCell)
+5 create custom setter in .m file that sets model, configure subviews so that they're hydrated with correct data (when you set the model, will also configure the view)
+6 import the custom table view cell you want to use in view controller that contains the table view
+
+7 register nibs that you plan on using in viewDidLoad 
+- code example:
+UINib *nib = [UINib nibWithNibName:@"MovieCell" bundle:nil]; // nib name must match name from Step 2 
+[self.tableView registerNib:nib forCellReuseIdentifier:@"MovieCell"]; // cell reuse identifier must match identifier from Step 8
+
+8 get an instance of the table view cell in cellForRowAtIndexPath using dequeueReusableCellWithIdentifier method (tells the table view which class you want it to instantiate based off of that identifier)
+- don't create new instance, but dequeue an existing table view cell from the table view with certain cell identifier (can reuse cells as they scroll off the screen)
+- code example:
+MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell" forIndexPath:indexPath];
+9 instantiate the dequeued table view cell using the setter from Step 5
+10 configure height of table rows if needed 
