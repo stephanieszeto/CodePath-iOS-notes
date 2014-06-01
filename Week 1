@@ -1,0 +1,83 @@
+iOS - Week 1
+
+Table Views
+- scrollable lists
+
+Mobile Apps
+1 View-heavy, data-driven: social, news, to-do (majority)
+key concepts: 
+- common controls, view layout
+- interaction & event handling
+- screen flows, navigation
+- data modeling, networking, persistence
+- OS services, hardware, accessing sensors
+
+2 Graphics-heavy drawing-based: games, creative art, photo editing
+
+Client Architecture
+views
+controllers, models
+networking, authentication
+UIKit, foundation
+device hardware
+
+Views
+- purpose: display data, receive data inputs
+- set number of main controls, inputs
+- layout system: absolute coordinates, nesting of views (no margins, padding, flow)
+- every view's positioning is within the context of its parent
+- not much dynamic layout with mobile
+- Autolayout: constraint-based layout system
+- three use cases: orientation change, stack two labels with dynamic height on top of each other, set two labels with dynamic width so that they're adjacent
+- every view in application is designed separately (no awareness of other screens)
+- hardest of all tiers to master (views, view-based interaction)
+
+Controllers
+- center of the world in iOS, one class that ties everything together
+- responsible for creating view, loading the template, processing any events on this page
+- work with views, models to implement dynamic behaviors, including:
+1 network requests (API interaction)
+2 persistence (storing data)
+- i.e. Core Data
+- not used very often (most apps depend on Internet access)
+- cache GET requests 
+3 event handling (button clicks, data input)
+- i.e. taps, long taps, long presses, rotations, etc.
+4 navigation (moving between app views)
+- go from one view controller to any other view controller
+- application is stateless across view controllers
+- may potentially want to pass in data from one view controller to another so that it preloads next view controller with correct data
+
+- init - make one network request, set loading state
+- upon callback, make loading state go away, reload views with fresh data
+
+Models 
+- on web, that's where all the logic is
+- apps respect the server, just echoes what's on the server 
+- needs to be able to pull to/from network
+- usually reflect the server state for data retrieved via APIs, including:
+1 model definitions (properties, relationships)
+2 JSON/XML serialization/deserialization 
+3 persistence storage (database)
+4 data formatters / presentation
+- i.e. contextual timestamps (2h ago)
+- don't want to bake into view code how to translate timestamp, so have model represent itself in different ways
+- model massages data so it's ready for templating system
+
+Networking
+- every API has a corresponding class, each endpoint you call is another method in that class
+- interacting with a server in one of the following ways:
+1 interacting with models via a REST API
+2 displaying external images in the view
+3 audio/video playback
+- event-based, streaming APIs
+4 socket programming (rare)
+- i.e. chat client
+
+Hardware
+- leveraging device features including:
+1 camera
+2 GPS
+3 accelerometer 
+4 Bluetooth, Airdrop
+5 Contacts, Calendar, SMS, Mail
