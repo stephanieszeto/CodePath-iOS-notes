@@ -1,0 +1,56 @@
+
+iOS - Week 2
+
+Creating Views 
+- three methods to create views:
+1 programmatic
+2 Interface Builder
+3 storyboard 
+- new visual way to represent screens, flows 
+- not widely used yet in production apps
+
+UIView
+- responsible for drawing a region of the screen
+- hierarchy: UIImageView > UIView > UIWindow
+- common properties: background color, alpha, frame, hidden, border, border radius
+- properties that can be animated: frame / bounds / center, transform, alpha, background color
+- may have arbitrary number of subviews
+- views do not clip their subviews by default (need to specify that explicitly)
+- detects touch events, gestures
+- common display views: UILabel, UIImageView, UIButton, UIWebView
+- common alert views: UIAlertView, UIActionSheet
+- common container views: UIScrollView, UITableView, UICollectionView, UIToolbar
+- common input views: UITextField, UITextView, UISearchBar
+- common control views: UISwitch, UISlider, UIPickerView, UISegmentedControl, UIPageControl
+
+UIView vs. CALayer
+- UIView is a wrapper around CALayer
+- rarely work with CALayer, except for:
+1 changing border, border radius properties
+2 using Core Animation (though View Animations will generally be enough)
+
+Events
+- events bubble up a chain of objects, starting with innermost view, then moving up the hierarchy
+- first responder: first object in the responder chain
+- if the first responder takes text input, keyboard will display
+- userInteractionEnabled = NO means object will be skipped in responder chain
+- will rarely touch the responder chain except to debug issues with touch detection, setting userInteractionEnabled = NO
+
+AutoresizingMask / Autolayout
+- pre-Autolayout, views were positioned absolutely (struts & springs model)
+- common situations for AutoresizingMask:
+1 unknown height
+2 shrinking cells when table edit controls become visible
+3 device orientation changes
+4 shared views between iPhone, iPad
+
+Navigation
+- navigation stack: most common navigation mechanism
+- general tasks:
+1 pushing new view controller
+2 popping view controller
+3 programmatically rearranging view controller stack (rare)
+- tab bar
+- general tasks:
+1 initializing available tabs
+2 hiding / showing tab bar
