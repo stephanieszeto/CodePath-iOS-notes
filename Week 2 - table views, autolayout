@@ -1,0 +1,149 @@
+iOS - Week 2
+
+Populating Custom Table View Cells
+- problem: should not configure cell in cellForRowAtIndexPath method, as:
+1 it exposes internal workings of cell to another class (bad from encapsulation perspective)
+2 the logic to configure the cell lives outside of the cell (hard to reuse cell in other places)
+- solution 1: expose a property in CustomCell that gives the cell the underlying data, then in a setter method, configure view elements (wraps up functionality of that cell inside the cell's class so it's separated from list view controller)
+- solution 2: create custom initializer method that takes that property as a parameter and sets it (generally, should also expose this property publically when following this pattern)
+
+- dequeueReusableCellWithIdentifier calls initWithCoder on cell
+- look at data for that row, see what type it is --> decide whether to dequeue PhotoCell, QuoteCell, etc.
+
+Lifecycle of View Controller
+- views don't exist yet at init
+- create reloadData method that reconnects views with data (call at end of setter, viewDidLoad to make sure that views is initialized with data)
+- you don't control lifecycle of view controller; at some point, will create views
+- table views control which cells can be reused / ditched
+
+NSUnknownKeyException
+- "this class is not key value coding-compliant for the key ___"
+- occurs when you create an IBOutlet for a component and then delete it (nib file is messed up)
+- File's Owner > Outlets should have an outlet with exclamation mark, warning sign, delete that outlet and problem should be solved
+- nibs are not a compile-time system --> it's a runtime system that is evaluated when running
+- MUJsonResponseSerializer: have model inherit from MUJSONResponseObject, takes away boilerplate to change JSON into properties, just remaps the JSON key to property
+
+Naming Conventions
+- if there is a return type, first word of method should be the noun of that return movie (i.e. if returning a movie object, first word of method should be movie)
+- no get, create
+- after method name, have list of parameters with type of parameter prefixed (i.e. (NSDictionary *)dictionary animated:(BOOL)animated)
+- no and, or, with
+
+UITableViewController
+- built-in class that has as a primary view a table view (lightweight)
+- automatically sets view controller with delegate, data source properties
+- will flash scroll indicators to indicate to user that it's a scrollable view
+- focusable elements in table view: will adjust content inset of table view to lift the element above keyboard to keep it visible (upon tap, usually will get obscured by keyboard if it comes up)
+- disadvantage: root view must be a table view - doesn't work if it has to be integrated with other things (i.e. search bar, error view), in those cases, want container wrapper that contain the table view and other elements that are fixed on the screen
+- foursquare example: check-in button that is constantly set on screen and doesn't scroll with the table view, button must be layered on top of table view in container
+- generally don't use UITableViewController unless you know those exceptions won't come up
+
+Outlets
+- always use nonatomic
+- if it's a primitive type (not an object), use assign
+- it it's a pointer (with a star), use strong
+- if it's an outlet or delegate, use weak
+
+===============
+
+View Controllers
+- instantiates view object (320 x 480) and fills the screen
+- bridges models with views: gets data, mashes data into views
+- handles events (gestures handled by views)
+
+Nibs
+- type of template 
+- XML file, parsed at run-time into XML nodes that are translated into UIView objects that are instantiated
+- when that process has completed, viewDidLoad is called within view controller
+- init: instantiation of state, network calls (will be called once per view controller)
+- viewDidLoad: configuration of views, tweak layers (may be called multiple times in view controller's lifecycle)
+
+Layouts
+- no margins, padding, box model
+- only set CGRect (the size), intrinsically setting padding by making height, width very wide (content will be centered within that)
+- iOS uses absolute layout; if it needs to be dynamic, then will use Autolayout
+
+UITableView
+- Steps to set-up:
+1 create table view, create outlet in .m file
+2 set yourself to be data source (for those two methods to be called), delegate (for table view events)
+3 implement cellForRowAtIndexPath, numberOfRowsInSection methods
+
+===============
+
+Resources
+- iOS documentation - class reference
+- Apple official guides (high-level guide, introduction to topics)
+
+Table Views
+- can create multiple sections (numberOfSectionsInTableView)
+- can specify titles for headers (titleForHeaderInSection)
+- can specify height for headers (heightForHeaderInSection)
+- can specify headers for sections (viewForHeaderInSection) where you can place title (UIView with UILabel)
+- plain table view: header will have sticky behavior (fixed right below navigation bar while in that section, will be bumped up / replaced by next section header)
+- grouped table view: header will go away upon scrolling table view
+- code example:
+UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 50)];
+UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 300, 20)];
+title.text = @"Title";
+[header addSubview:title];
+
+Customizing Table Views
+- supports Swipe to Delete, reordering easily (as long as you like default implementation)
+- if we want to customize default selection behavior, two options:
+1 set selection view for cell (setSelected in custom table view class)
+2 set highlighted view for cell (setHighlighted in custom table view class)
+
+Accordion Table View
+- use row animations (upon tap, animate in more cells)
+- to expand table view, tell table view there's now more rows in that sections
+- use boolean to keep track of cell's expanded state
+- didSelectRowAtIndexPath: upon selection, change expanded = !expanded, if expanded, insertSections; otherwise, if not expanded, deleteSections, then call reloadData (if just reloadData, will expand with no animation)
+- numberOfRowsInSection: modify to take into account expanded state
+- heightForRowAtIndexPath: modify to take into account expanded state (upon click, have row grow in height)
+- consistency rule: number of sections in table view after update must equal the number of sections contained in table view before update +/- number of sections inserted or deleted
+
+Table View Tips
+- remember to deselect table view cells upon selection (deselectRowAtIndexPath in didSelectRowAtIndexPath)
+- heightForRowAtIndexPath: should be fast, directly affects how fast scrollling happens, cannot access the cell from this method (may create infinite loop, also makes it very slow - don't do any allocations), must tell yourself what height of components will be (use intrinsic properties of NSString)
+
+An Aside on Strings
+- NSString: built-in default class for strings, boundingRectWithSize: method that gives you bounding rectangle for string, also that string will be X many lines given input parameters (width/label, attributes of string) 
+- needs to know width so it knows where string will wrap --> generally, people pass in CGSize with actual width, very tall height (which will be shrunk usually)
+- AttributedString: rich string type in iOS, use this when including fonts, colors, formatting, etc.  
+
+===============
+
+Autolayout
+- pre-Autolayout, no purpose in using nibs/Interface Builder; prefer using programmatic layouts to tweak rects
+- three use cases: 
+1 size may change (either 3.5" or 4" screen)
+2 orientation may change with rotation (either portrait or landscape)
+3 dynamic height components (usually labels) - (either two dynamic height labels on top of each other or two dynamic width labels adjacent to each other)
+- three tiers: 
+1 graphically with Interface Builder in nibs
+2 programmatic with Visual Format Language (special syntax to specify constraints)
+3 define constraints programmatically (difficult to read)
+
+Autolayout Rules
+- once you have one constraint, must add all constraints
+- orange constraints = no bueno, blue constraints = bueno
+- must have enough constraints to derive x, y, width, height
+- can set constraints relative to different objects (i.e. parent view, neighboring UIViews, etc.x)
+- if you move a UIView that has constraints on it, need to either update the constraints, or update the frames
+- if view is overconstrained, will randomly choose to break a constraint in order to solve the linear equation; will throw a non-crashing error to show you which constraint it broke
+
+Autolayout Tips
+- generally, shouldn't use Add Missing Constraints feature (adds large number of unncessary constraints)
+- some views have intrinsic content sizes (i.e. UILabel has intrinsic width, height)
+- should set UILabel's width to be actual width, place width constraint on it (or else will use default UILabel width)
+- can create outlets for constraints to adjust constants programmatically
+
+A Confusing Tangent on Prototypical Cells
+- can either bake in width (make it match the width you set in Interface Builder) or create prototypical cell with certain dimensions, allocate one cell, set / extract properties of UILabel from that protoypical cell (i.e. width, font characteristics) so you don't have to manually make the match - keep querying the cell for those properties
+- to do this: alloc / init another cell, keep around as a property of the view controller
+- once initiated, layout will be what you have in nib (although height will change dynamically once populated with data); layout will have your specified geometry as well as the constraints evaluated to arrive at this geometry
+- from there, can then query width and font from that layout
+
+Questions
+1 What does reloadData do exactly / what methods are called upon calling reloadData?
